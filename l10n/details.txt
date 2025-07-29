@@ -1030,8 +1030,11 @@ HTTP Response Headers
  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 
 [mpermission]
- Previously called "Feature-Policy", allow and deny the use of browser features.
+ Previously called "Feature-Policy", this critical header allows and denies the use of browser features.
+ It helps reduce the attack surface by restricting features that aren't needed by your site.
+ Properly configured, it enhances security by limiting permissions for sensitive browser APIs.
  Ref: https://scotthelme.co.uk/goodbye-feature-policy-and-hello-permissions-policy/
+ Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
 
 [mnel]
  Enables web applications to declare a reporting policy to report errors.
@@ -1944,3 +1947,6 @@ Generator
 
 [proxy_url]
  Error: Proxy not reachable.
+
+[permissions_policy_info]
+ Permissions-Policy header controls which browser features and APIs can be used in the browser. It is essential for restricting potentially harmful features, enhancing privacy, and improving security posture. A well-configured policy should explicitly deny access to sensitive features unless they're needed.

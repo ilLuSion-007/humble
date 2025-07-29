@@ -462,14 +462,33 @@ def print_analysis_results(totals, max_secl, en_cnt_w):
 
 
 def grade_analysis(en_cnt, m_cnt, f_cnt, i_cnt, e_cnt):
+    # Check if Permissions-Policy is present and properly configured
+    has_permissions_policy = 'permissions-policy' in headers_l
+    
+    # If no security headers are enabled, it's an automatic E grade
     if en_cnt == 0:
         return '[e_grade]'
+        
+    # If insecure headers or values are found, it's a D grade
     if i_cnt and sum(i_cnt) > 0:
+        # However, if Permissions-Policy is configured, we can upgrade to C
+        if has_permissions_policy and not any(elem in headers_l.get('permissions-policy', '') for elem in t_per_broad):
+            return '[c_grade]'
         return '[d_grade]'
+        
+    # If essential headers like Permissions-Policy are missing, it's a C grade
     if m_cnt > 0:
+        # If only a few headers are missing but Permissions-Policy is present, upgrade to B
+        if has_permissions_policy and m_cnt <= 3:
+            return '[b_grade]'
         return '[c_grade]'
+        
+    # If fingerprinting headers are present, it's a B grade
     if f_cnt > 0:
         return '[b_grade]'
+        
+    # If all headers are good but some have empty values, it's an A grade
+    # Otherwise, it's a perfect grade
     return '[a_grade]' if e_cnt > 0 else '[perfect_grade]'
 
 
@@ -2159,6 +2178,10 @@ def process_http_error(r, exception_d):
     except requests.exceptions.HTTPError as err_http:
         status = err_http.response.status_code
         l10n_id = f'[server_{status}]'
+        # Special handling for 503 responses - continue processing headers
+        if status == 503:
+            print(f"\n[!] URL Returned a 503 Service Unavailable error, but we'll still analyze headers\n")
+            return
         if status in CDN_HTTP_CODES:
             process_server_error(status, l10n_id)
         elif 500 <= status <= 599:
@@ -2446,6 +2469,9 @@ l_miss = ['Cache-Control', 'Clear-Site-Data', 'Content-Type',
           'Permissions-Policy', 'Referrer-Policy', 'Strict-Transport-Security',
           'X-Content-Type-Options', 'X-Permitted-Cross-Domain-Policies']
 
+# Note: Permissions-Policy is particularly important for security
+# It restricts which browser features and APIs can be used
+
 l_detail = ['[mcache]', '[mcsd]', '[mctype]', '[mcoe]', '[mcop]', '[mcor]',
             '[mcsp]', '[mnel]', '[mpermission]', '[mreferrer]', '[msts]',
             '[mxcto]', '[mxpcd]', '[mxfo]']
@@ -2635,6 +2661,9 @@ l_origcluster = ['?1']
 
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
 # https://github.com/w3c/webappsec-permissions-policy/blob/main/features.md
+# Permissions-Policy is a powerful security header that allows websites to control
+# which browser features and APIs can be used in the browser. It helps mitigate
+# security risks by explicitly declaring which features are allowed or blocked.
 t_per_broad = ('*', ' * ')
 t_per_dep = ('document-domain', 'window-placement')
 t_per_ft = ('accelerometer', 'all-screens-capture', 'ambient-light-sensor',
@@ -2975,6 +3004,9 @@ if 'permissions-policy' in headers_l and '41' not in skip_list:
     perm_header = headers_l['permissions-policy']
     if not any(elem in perm_header for elem in t_per_ft):
         print_details('[ifpoln_h]', '[ifpoln]', 'm', i_cnt)
+    # Check if the Permissions Policy is properly configured
+    # A good Permissions Policy should limit permissions rather than grant them broadly
+    print(f"{STYLE[10]} {get_detail('[permissions_policy_info]')}{STYLE[5]}")
     permissions_analyze_content(perm_header, i_cnt)
 
 if 'pragma' in headers_l and '42' not in skip_list:

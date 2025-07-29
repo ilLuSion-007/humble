@@ -1032,8 +1032,11 @@ Cabeceras de respuesta HTTP
  Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 
 [mpermission]
- Anteriormente llamada "Feature-Policy", permite o deniega funciones del navegador.
+ Anteriormente llamada "Feature-Policy", esta cabecera crítica permite o deniega funciones del navegador.
+ Ayuda a reducir la superficie de ataque al restringir funciones que no son necesarias para tu sitio.
+ Correctamente configurada, mejora la seguridad limitando los permisos para APIs sensibles del navegador.
  Ref: https://scotthelme.co.uk/goodbye-feature-policy-and-hello-permissions-policy/
+ Ref: https://developer.mozilla.org/es/docs/Web/HTTP/Headers/Permissions-Policy
 
 [mnel]
  Permite declarar directivas para notificar errores.
@@ -1927,3 +1930,6 @@ Generador
 
 [proxy_url]
  Error: Proxy no accesible.
+
+[permissions_policy_info]
+ La cabecera Permissions-Policy controla qué características y APIs del navegador pueden utilizarse. Es esencial para restringir funciones potencialmente dañinas, mejorar la privacidad y reforzar la seguridad. Una política bien configurada debe denegar explícitamente el acceso a características sensibles a menos que sean necesarias.
